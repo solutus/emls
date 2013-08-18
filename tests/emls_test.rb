@@ -14,7 +14,9 @@ describe Emls do
 
   describe Emls::ItemParser do 
     MAP = {
-      address: "Приморский Байконурская ул., 5к1 Пионерская (пеш 10м)",
+      address: "Приморский Байконурская ул., 5к1 пр. Просвещения (пеш 10м)",
+      district: "Приморский",
+      metro: "пр. Просвещения",
       link_to_details: "http://www.emls.ru/fullinfo/1/372848.html",
       link_to_map: "http://maps.yandex.ru/?text=%D0%EE%F1%F1%E8%FF%2C%20%D1%E0%ED%EA%F2-%CF%E5%F2%E5%F0%E1%F3%F0%E3%2C%20%C1%E0%E9%EA%EE%ED%F3%F0%F1%EA%E0%FF%20%F3%EB.%2C%205%EA1&z=13&l=map%2Cstv&ol=stv&oll=30.27749970%2C59.99730500&oid",
       stage: "6", 
@@ -70,7 +72,7 @@ describe Emls do
             Приморский<br>
             <a href="#" onclick="javascript:window.open('http://www.emls.ru/onmap/?query=r/2/rd/2/rdd/14/s/1296/hn/5/hk/1', '_blank', 'width=500,height=500,scrollbars=0'); return false;">
               Байконурская ул., 5к1
-            </a><br>Пионерская<br>(пеш 10м)
+            </a><br>пр. Просвещения<br>(пеш 10м)
           </td>
           <td>1к. 32.2/18<br>кух. 6.2 кор. 5</td>
           <td>6/9<br>пот-к 2.6м</td>

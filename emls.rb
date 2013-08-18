@@ -45,6 +45,7 @@ class Emls
     parse.map{|i| i.to_s}.join("\n\n===================================\n")
   end
 
+  # for testing purposes. can be deleted at anytime
   def self.stored_html
     str = File.read(File.expand_path("../../emls.html", __FILE__))
     str.encode("utf-8")
@@ -81,13 +82,24 @@ class Emls
     def address
       @address ||= td_text(1)
     end
-    
+
     def link_to_map
       @link_to_map ||= link_by_image_title(td(0), "Панорама", false)
     end
 
+    def metro
+      @metro ||= -> do 
+        text = td(1).children.to_s.strip
+        # extract substring after </a> and before brackets 
+        text
+          .gsub(/^[\p{Graph}\p{Punct}\s]+<\/a>/, "")
+          .gsub(/\(.*$/, "")
+          .strip
+      end.call
+    end
+
     def district
-      DEFAULT_VALUE 
+      @district ||= address.scan(/^\p{Word}+/).first
     end
 
     def stage
