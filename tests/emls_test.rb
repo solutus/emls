@@ -12,6 +12,49 @@ describe Emls do
     end
   end
 
+  describe ".compose_url" do 
+    it "returns valid url for array" do 
+      flat_types = [0, 1, 2]
+      min_price = 2800
+      max_price = 3200
+      min_square = 28
+      max_square = 33
+      districts = [Emls::DISTRICTS["Приморский"],
+                   Emls::DISTRICTS["Выборгский"]]
+      metros = [Emls::METROS["Просвещения пр."], 
+                Emls::METROS["Пионерская"]]
+      interval = Emls::INTERVAL["месяц"]
+      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+      url.must_equal "http://www.emls.ru/flats/?query=r0/1/r1/1/r2/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4-14/tr[]/37-40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
+    end
+
+    it "returns valid url for one params in array" do 
+      flat_types = [1]
+      min_price = 2800
+      max_price = 3200
+      min_square = 28
+      max_square = 33
+      districts = [Emls::DISTRICTS["Выборгский"]]
+      metros = [Emls::METROS["Просвещения пр."]]
+      interval = Emls::INTERVAL["месяц"]
+      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+      url.must_equal "http://www.emls.ru/flats/?query=r1/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
+    end
+
+    it "returns valid url for rarefied params" do 
+      flat_types = [1]
+      min_price = nil 
+      max_price = nil  
+      min_square = nil 
+      max_square = 33
+      districts = [Emls::DISTRICTS["Выборгский"]]
+      metros = [Emls::METROS["Просвещения пр."]]
+      interval = Emls::INTERVAL["месяц"]
+      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+      url.must_equal "http://www.emls.ru/flats/?query=r1/1/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
+    end
+  end
+
   describe Emls::ItemParser do 
     MAP = {
       address: "Приморский Байконурская ул., 5к1 пр. Просвещения (пеш 10м)",
