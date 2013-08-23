@@ -15,7 +15,8 @@ class Emls
                "Cookie" => "PHPSESSID=4a93cm3sfosil6s4j0r2dso296; ss=32fc50586616f12d6aebba01bb7121b3"
   }
   
-  BASE_URL = "http://www.emls.ru/flats/?query="
+  HOST = "http://www.emls.ru"
+  BASE_URL = HOST +  "/flats/?query="
 
   DISTRICTS = {
              "Не указано" => 0,
@@ -118,17 +119,55 @@ INTERVAL = {
     "без ограничений" => 3
 }
 
-  HOST = "http://www.emls.ru" 
-  PIONERSKAYA_URL = HOST + "/flats/?query=r0/1/r1/1/pmin/2800/pmax/3200/samin/28/samax/33/reg/2/dept/2/tr[]/37/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
+  def initialize(search_params={})
+    @url =  compose_url search_params
+  end
 
-  def compose_url(flat_types, 
-                  min_price, 
-                  max_price, 
-                  min_square,
-                  max_square,
-                  districts,
-                  metros,
-                  interval)
+  def flats 
+    @flats ||= Parser.new(docs).parse.sort_by(&:price)
+  end
+
+  def to_s
+    parse.map{|i| i.to_s}.join("\n\n===================================\n")
+  end
+
+  def docs
+    initial_doc = doc @url
+    [initial_doc] + pages_urls(initial_doc).map{|url| doc url }
+  end
+
+  def open_url(url)
+    res = open(url, HEADERS).read
+    sleep(5)
+    res
+  end
+
+  def doc(url)
+    str = open_url(url)
+    str = str.encode("utf-8")
+    # replace <br> to whitespace for easy parsing 
+    doc = Nokogiri::HTML(str)
+    doc.css("br").each{|br| br.replace " "} #, nil, ENCODING)
+    doc
+  end
+
+  def pages_urls(doc)
+    doc
+      .css("a[title*='страница']")
+      .map(&:attributes)
+      .map{|attrs| attrs["href"].value }
+      .uniq
+      .map{|path| HOST + path }
+  end
+
+  def compose_url(flat_types: [0, 1], 
+                  min_price: 2800, 
+                  max_price: 3200, 
+                  min_square: 28,
+                  max_square: 33,
+                  districts: [4, 14] ,
+                  metros: [37, 40],
+                  interval: 2)
     url = BASE_URL
 
     params = []
@@ -153,61 +192,38 @@ INTERVAL = {
     arr.sort.join "-"
   end
 
-  def initialize(html = nil)
-    @html = html
-  end
+  class Parser
+    def initialize(docs)
+      @docs = docs
+    end
 
-  def open_url
-    open(PIONERSKAYA_URL, HEADERS) 
-  end
+    def parse
+      @docs.map{|doc| parse_doc doc }.flatten
+    end
 
-  def doc
-    @doc ||= -> do 
-      str = @html ? @html : open_url.read
-      str = str.encode("utf-8")
-      # replace <br> to whitespace for easy parsing 
-      doc = Nokogiri::HTML(str)
-      doc.css("br").each{|br| br.replace " "} #, nil, ENCODING)
+    def parse_doc(doc)
       doc
-    end.call
+        .css(".table_with_data")
+        .select{|tr| tr.css("td").size >= 7} # select standard objects
+        .map{|item| ItemParser.new item }
+    end
   end
-
-  def parse
-    Parser.new(doc).parse
-  end
-
-  def to_s
-    parse.map{|i| i.to_s}.join("\n\n===================================\n")
-  end
-
-  # for testing purposes. can be deleted at anytime
-  def self.stored_html
-    str = File.read(File.expand_path("../../emls.html", __FILE__))
-    str.encode("utf-8")
-    str
-  end
-
-  class BaseElement
+  
+  class ItemParser 
+    SHORT_FORMAT_FIELDS = [:address, :description, :details, 
+      :price, :stage, :stage_amount]
     DEFAULT_VALUE = nil
     def initialize(doc)
       @doc = doc
-    end
-  end
-
-  class Parser < BaseElement
-    def parse
-      @doc.css(".table_with_data").map{|item| ItemParser.new(item)}
-    end
-  end
-
-  class ItemParser < BaseElement
-    def initialize(doc)
-      super(doc)
+      puts "doc::: #{doc.to_s}"
       @created_at = Time.now
     end
 
-    def to_s
-      methods = Emls::ItemParser.public_instance_methods(false) - [:to_s]
+    def to_s(format = :short)
+      methods = self.class.public_instance_methods(false) - [:to_s]
+      if format = :short
+        methods = methods.select{|m| SHORT_FORMAT_FIELDS.include? m }
+      end
       methods.inject([]) do |data, m|
         data << "#{m}: #{send m}"
         data
@@ -258,6 +274,7 @@ INTERVAL = {
     end
 
     def price
+      puts "price #{td(4).to_s}"
       td_text(4).scan(/^\d+/).first
     end
 

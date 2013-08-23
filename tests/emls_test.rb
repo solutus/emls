@@ -3,12 +3,30 @@ require "minitest/autorun"
 
 describe Emls do
   before do
-    @emls = Emls.new(HTML)
+    @emls = Emls.new({})
+    def @emls.open_url(any)
+      HTML
+    end
+    @emls_class = class << @emls; self; end 
   end
 
-  describe ".parse" do 
+  describe ".flats" do 
     it "returns array" do 
-      @emls.parse.must_be_instance_of Array
+      @emls.flats.must_be_instance_of Array
+    end
+  end
+
+  describe ".pages_urls" do 
+    it "parses doc and gets array of links to pages" do 
+     result = [ 
+        "/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
+        "/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3", 
+        "/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
+        "/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
+        "/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3"
+      ]
+      result = result.map{|path| Emls::HOST + path}
+      @emls.pages_urls(@emls.doc nil).must_equal result
     end
   end
 
@@ -24,7 +42,15 @@ describe Emls do
       metros = [Emls::METROS["Просвещения пр."], 
                 Emls::METROS["Пионерская"]]
       interval = Emls::INTERVAL["месяц"]
-      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+
+      url = @emls.compose_url(flat_types: flat_types, 
+                              min_price: min_price, 
+                              max_price: max_price, 
+                              min_square: min_square, 
+                              max_square: max_square, 
+                              districts: districts, 
+                              metros:    metros, 
+                              interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r0/1/r1/1/r2/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4-14/tr[]/37-40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
 
@@ -37,7 +63,14 @@ describe Emls do
       districts = [Emls::DISTRICTS["Выборгский"]]
       metros = [Emls::METROS["Просвещения пр."]]
       interval = Emls::INTERVAL["месяц"]
-      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+      url = @emls.compose_url(flat_types: flat_types, 
+                              min_price: min_price, 
+                              max_price: max_price, 
+                              min_square: min_square, 
+                              max_square: max_square, 
+                              districts: districts, 
+                              metros:    metros, 
+                              interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r1/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
 
@@ -50,7 +83,15 @@ describe Emls do
       districts = [Emls::DISTRICTS["Выборгский"]]
       metros = [Emls::METROS["Просвещения пр."]]
       interval = Emls::INTERVAL["месяц"]
-      url = @emls.compose_url(flat_types, min_price, max_price, min_square, max_square, districts, metros, interval)
+
+      url = @emls.compose_url(flat_types: flat_types, 
+                              min_price: min_price, 
+                              max_price: max_price, 
+                              min_square: min_square, 
+                              max_square: max_square, 
+                              districts: districts, 
+                              metros:    metros, 
+                              interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r1/1/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
   end
@@ -100,6 +141,9 @@ describe Emls do
     <html>
       <head></head>
       <body>
+        <div>
+          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a> 
+        </div>
         <tr class="html_table_tr_1 table_with_data" data-href="/fullinfo/1/372848.html">
           <td class="fc" align="center">
             <input type="checkbox" name="ids[]" value="372848" onclick="addMarkWithCity( 1, 372848, this.checked, 'spb' );">
@@ -132,6 +176,10 @@ describe Emls do
             </a>
           </td>
         </tr>
+
+        <div>
+          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a> 
+        </div>
       </body>
     </html>
     }
