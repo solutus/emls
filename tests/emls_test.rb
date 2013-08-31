@@ -7,20 +7,20 @@ describe Emls do
     def @emls.open_url(any)
       HTML
     end
-    @emls_class = class << @emls; self; end 
+    @emls_class = class << @emls; self; end
   end
 
-  describe ".flats" do 
-    it "returns array" do 
+  describe ".flats" do
+    it "returns array" do
       @emls.flats.must_be_instance_of Array
     end
   end
 
-  describe ".pages_urls" do 
-    it "parses doc and gets array of links to pages" do 
-     result = [ 
+  describe ".pages_urls" do
+    it "parses doc and gets array of links to pages" do
+     result = [
         "/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
-        "/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3", 
+        "/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
         "/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
         "/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3",
         "/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3"
@@ -30,106 +30,106 @@ describe Emls do
     end
   end
 
-  describe ".compose_url" do 
-    it "returns valid url for array" do 
+  describe ".compose_url" do
+    it "returns valid url for array" do
       flat_types = [0, 1, 2]
-      min_price = 2800
-      max_price = 3200
+      min_price  = 2800
+      max_price  = 3200
       min_square = 28
       max_square = 33
-      districts = [Emls::DISTRICTS["Приморский"],
-                   Emls::DISTRICTS["Выборгский"]]
-      metros = [Emls::METROS["Просвещения пр."], 
-                Emls::METROS["Пионерская"]]
-      interval = Emls::INTERVAL["месяц"]
+      districts  = [Emls::DISTRICTS["Приморский"],
+                    Emls::DISTRICTS["Выборгский"]]
+      metros     = [Emls::METROS["Просвещения пр."],
+                    Emls::METROS["Пионерская"]]
+      interval   = Emls::INTERVAL["месяц"]
 
-      url = @emls.compose_url(flat_types: flat_types, 
-                              min_price: min_price, 
-                              max_price: max_price, 
-                              min_square: min_square, 
-                              max_square: max_square, 
-                              districts: districts, 
-                              metros:    metros, 
+      url = @emls.compose_url(flat_types: flat_types,
+                              min_price: min_price,
+                              max_price: max_price,
+                              min_square: min_square,
+                              max_square: max_square,
+                              districts: districts,
+                              metros:    metros,
                               interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r0/1/r1/1/r2/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4-14/tr[]/37-40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
 
-    it "returns valid url for one params in array" do 
+    it "returns valid url for one params in array" do
       flat_types = [1]
-      min_price = 2800
-      max_price = 3200
+      min_price  = 2800
+      max_price  = 3200
       min_square = 28
       max_square = 33
-      districts = [Emls::DISTRICTS["Выборгский"]]
-      metros = [Emls::METROS["Просвещения пр."]]
-      interval = Emls::INTERVAL["месяц"]
-      url = @emls.compose_url(flat_types: flat_types, 
-                              min_price: min_price, 
-                              max_price: max_price, 
-                              min_square: min_square, 
-                              max_square: max_square, 
-                              districts: districts, 
-                              metros:    metros, 
+      districts  = [Emls::DISTRICTS["Выборгский"]]
+      metros     = [Emls::METROS["Просвещения пр."]]
+      interval   = Emls::INTERVAL["месяц"]
+      url = @emls.compose_url(flat_types: flat_types,
+                              min_price: min_price,
+                              max_price: max_price,
+                              min_square: min_square,
+                              max_square: max_square,
+                              districts: districts,
+                              metros:    metros,
                               interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r1/1/pmin/2800/pmax/3200/samin/28.00/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
 
-    it "returns valid url for rarefied params" do 
+    it "returns valid url for rarefied params" do
       flat_types = [1]
-      min_price = nil 
-      max_price = nil  
-      min_square = nil 
+      min_price  = nil
+      max_price  = nil
+      min_square = nil
       max_square = 33
-      districts = [Emls::DISTRICTS["Выборгский"]]
-      metros = [Emls::METROS["Просвещения пр."]]
-      interval = Emls::INTERVAL["месяц"]
+      districts  = [Emls::DISTRICTS["Выборгский"]]
+      metros     = [Emls::METROS["Просвещения пр."]]
+      interval   = Emls::INTERVAL["месяц"]
 
-      url = @emls.compose_url(flat_types: flat_types, 
-                              min_price: min_price, 
-                              max_price: max_price, 
-                              min_square: min_square, 
-                              max_square: max_square, 
-                              districts: districts, 
-                              metros:    metros, 
+      url = @emls.compose_url(flat_types: flat_types,
+                              min_price: min_price,
+                              max_price: max_price,
+                              min_square: min_square,
+                              max_square: max_square,
+                              districts: districts,
+                              metros:    metros,
                               interval:  interval)
       url.must_equal "http://www.emls.ru/flats/?query=r1/1/samax/33.00/reg/2/dept/2/dist/4/tr[]/40/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/2"
     end
   end
 
-  describe Emls::ItemParser do 
+  describe Emls::ItemParser do
     MAP = {
       address: "Приморский Байконурская ул., 5к1 пр. Просвещения (пеш 10м)",
       district: "Приморский",
       metro: "пр. Просвещения",
       link_to_details: "http://www.emls.ru/fullinfo/1/372848.html",
       link_to_map: "http://maps.yandex.ru/?text=%D0%EE%F1%F1%E8%FF%2C%20%D1%E0%ED%EA%F2-%CF%E5%F2%E5%F0%E1%F3%F0%E3%2C%20%C1%E0%E9%EA%EE%ED%F3%F0%F1%EA%E0%FF%20%F3%EB.%2C%205%EA1&z=13&l=map%2Cstv&ol=stv&oll=30.27749970%2C59.99730500&oid",
-      stage: "6", 
-      stage_amount: "9" , 
-      rooms: "1", 
-      square: "32.2", 
-      live_square: "18", 
-      kitchen: "6.2", 
-      corridor: "5", 
-      price: "3100", 
+      stage: "6",
+      stage_amount: "9" ,
+      rooms: "1",
+      square: "32.2",
+      live_square: "18",
+      kitchen: "6.2",
+      corridor: "5",
+      price: "3100",
       price_per_meter: "96",
       contact_link: "http://www.emls.ru/agent/161817.html?query=type/full",
-      contacts: "АБСОЛЮТ Сити Мальковская И.В. 440-9999, 450-9999 06.08.2013", 
-      placed_at: "06.08.2013", 
+      contacts: "АБСОЛЮТ Сити Мальковская И.В. 440-9999, 450-9999 06.08.2013",
+      placed_at: "06.08.2013",
       details: "1к. 32.2/18 кух. 6.2 кор. 5",
       description: %q{Панельный, Крупно-панельн., (г.п. 1977); ремонт Произведен, ТЕЛ-Есть, гор.вода Теплоцентр, СУ-Раздельный ПП, б.3х лет, зелень Высокоразвитая инфраструктура, между двумя станциями метро "Пионерская" и "Комендантский пр." в пешей доступности, все рядом: гипермаркеты, магазины, объекты социальной сферы (дет.садики, школы, поликлиники), выезд на КАД. ЗСД. Балкона нет. Квартира в собст-ти более 3-х лет, подойдет любая ипотека. Прямая продажа. Тел. 8-921-567-41-12 Ирина},
     }
 
-    before do 
+    before do
       @item = @emls.parse[0]
     end
 
     MAP.each do |meth, result|
-      it "#{meth} is equal #{result}" do 
+      it "#{meth} is equal #{result}" do
         @item.send(meth).must_equal result
       end
     end
 
-    it "has created at" do 
+    it "has created at" do
       ((Time.now - @item.created_at) < 1).must_equal true
     end
 
@@ -142,7 +142,7 @@ describe Emls do
       <head></head>
       <body>
         <div>
-          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a> 
+          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a>
         </div>
         <tr class="html_table_tr_1 table_with_data" data-href="/fullinfo/1/372848.html">
           <td class="fc" align="center">
@@ -178,7 +178,7 @@ describe Emls do
         </tr>
 
         <div>
-          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a> 
+          Страницы: [1]	 <a href="/flats/page2.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 2">2</a>  <a href="/flats/page3.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 3">3</a>  <a href="/flats/page4.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 4">4</a>  <a href="/flats/page5.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 5">5</a>  <a href="/flats/page6.html?query=r2/1/reg/2/dept/2/tr[]/49/sort1/7/dir1/1/s/1/sort2/1/dir2/2/interval/3" title="страница 6">6</a>
         </div>
       </body>
     </html>
