@@ -14,7 +14,7 @@ class Emls
       "Accept-Language" => "en-US,en;q=0.8",
                "Cookie" => "PHPSESSID=4a93cm3sfosil6s4j0r2dso296; ss=32fc50586616f12d6aebba01bb7121b3"
   }
-  
+
   HOST = "http://www.emls.ru"
   BASE_URL = HOST +  "/flats/?query="
 
@@ -104,26 +104,27 @@ class Emls
            "Чернышевская" => 14,
              "Чкаловская" => 55,
             "Электросила" => 27
-}
+  }
 
-INTERVAL = {
-            "сегодня" => 4,
-              "2 дня" => 5,
-              "3 дня" => 7,
-              "4 дня" => 8,
-             "5 дней" => 9,
-             "6 дней" => 10,
-             "неделя" => 1,
-           "2 недели" => 6,
-              "месяц" => 2,
-    "без ограничений" => 3
-}
+  INTERVAL = {
+              "сегодня" => 4,
+                "2 дня" => 5,
+                "3 дня" => 7,
+                "4 дня" => 8,
+               "5 дней" => 9,
+               "6 дней" => 10,
+               "неделя" => 1,
+             "2 недели" => 6,
+                "месяц" => 2,
+      "без ограничений" => 3
+  }
 
-  def initialize(search_params={})
-    @url =  compose_url search_params
+  def initialize(params={})
+    @search_params = compose_params(params)
+    @url =  compose_url @search_params
   end
 
-  def flats 
+  def flats
     @flats ||= Parser.new(docs).parse.sort_by(&:price)
   end
 
@@ -145,7 +146,7 @@ INTERVAL = {
   def doc(url)
     str = open_url(url)
     str = str.encode("utf-8")
-    # replace <br> to whitespace for easy parsing 
+    # replace <br> to whitespace for easy parsing
     doc = Nokogiri::HTML(str)
     doc.css("br").each{|br| br.replace " "} #, nil, ENCODING)
     doc
@@ -160,14 +161,25 @@ INTERVAL = {
       .map{|path| HOST + path }
   end
 
-  def compose_url(flat_types: [0, 1], 
-                  min_price: 2800, 
-                  max_price: 3200, 
-                  min_square: 28,
-                  max_square: 33,
-                  districts: [4, 14] ,
-                  metros: [37, 40],
-                  interval: 2)
+  def compose_params(**opts)
+    { flat_types: [0, 1],
+      min_price: 2800,
+      max_price: 3200,
+      min_square: 28,
+      max_square: 33,
+      districts: [4, 14],
+      metros: [37, 40],
+      interval: 2 }.merge(opts)
+  end
+
+  def compose_url(flat_types: nil,
+                  min_price:  nil,
+                  max_price:  nil,
+                  min_square: nil,
+                  max_square: nil,
+                  districts:  nil,
+                  metros:     nil,
+                  interval:   nil)
     url = BASE_URL
 
     params = []
@@ -192,6 +204,18 @@ INTERVAL = {
     arr.sort.join "-"
   end
 
+  def save
+    DB.transaction do
+      search = Search.find_or_create(@search_params)
+      iteration = Iteration.create search_id: search.id
+      flats.each do |f|
+        f.iteration_id = iteration.id
+        f.save
+      end
+    end
+    true
+  end
+
   class Parser
     def initialize(docs)
       @docs = docs
@@ -208,20 +232,39 @@ INTERVAL = {
         .map{|item| ItemParser.new item }
     end
   end
-  
-  class ItemParser 
-    SHORT_FORMAT_FIELDS = [:address, :description, :details, 
-      :price, :stage, :stage_amount]
+
+  class ItemParser
+    SHORT_FORMAT_FIELDS = [:address, :description, :details,
+                           :price, :stage, :stage_amount]
     DEFAULT_VALUE = nil
+    attr_accessor :iteration_id
+
     def initialize(doc)
       @doc = doc
-      puts "doc::: #{doc.to_s}"
       @created_at = Time.now
+    end
+
+    def as_json
+      ConfigData[:tables][:flat_snapshots].keys.inject({}) do |res, field|
+        res[field] = send field if respond_to? field
+        res
+      end
+    end
+
+    def save
+      data = as_json
+      flat = Flat.find_or_create(uid: uid)
+      data.merge!({flat_id: flat.id})
+      FlatSnapshot.create data
+    end
+
+    def uid
+      link_to_details
     end
 
     def to_s(format = :short)
       methods = self.class.public_instance_methods(false) - [:to_s]
-      if format = :short
+      if format == :short
         methods = methods.select{|m| SHORT_FORMAT_FIELDS.include? m }
       end
       methods.inject([]) do |data, m|
@@ -239,9 +282,9 @@ INTERVAL = {
     end
 
     def metro
-      @metro ||= -> do 
+      @metro ||= -> do
         text = td(1).children.to_s.strip
-        # extract substring after </a> and before brackets 
+        # extract substring after </a> and before brackets
         text
           .gsub(/^[\p{Graph}\p{Punct}\s]+<\/a>/, "")
           .gsub(/\(.*$/, "")
@@ -254,7 +297,7 @@ INTERVAL = {
     end
 
     def stage
-      stages[:stage] 
+      stages[:stage]
     end
 
     def stage_amount
@@ -274,7 +317,6 @@ INTERVAL = {
     end
 
     def price
-      puts "price #{td(4).to_s}"
       td_text(4).scan(/^\d+/).first
     end
 
@@ -282,9 +324,9 @@ INTERVAL = {
       (price.to_f / square.to_f).to_i.to_s
     end
 
-    def contact_link 
+    def contact_link
       a = td(5).search("a").first
-      link_from_a a if a 
+      link_from_a a if a
     end
 
     def contacts
@@ -300,7 +342,7 @@ INTERVAL = {
     end
 
     def created_at
-      @created_at 
+      @created_at
     end
 
     def link_to_details
@@ -334,7 +376,7 @@ INTERVAL = {
     end
 
     def stages
-      @stages ||= -> do 
+      @stages ||= -> do
         str = td_text(3)
         arr = str.scan(/(\d+)\/(\d+)/).first
         {stage: arr[0], stage_amount: arr[1]}
@@ -342,12 +384,12 @@ INTERVAL = {
     end
 
     def details_hash
-      @details_hash ||= -> do  
+      @details_hash ||= -> do
         # clean string from new line symbols
         str = td_text(2)
-        
+
         details = {}
-        details["rooms"]    = delete_template str, /^(\d+).\./           
+        details["rooms"]    = delete_template str, /^(\d+).\./
         details["kitchen"]  = delete_template str, /кух\.\s+(#{float_r})/
         details["corridor"] = delete_template str, /кор\.\s+(#{float_r})/
         s, ls               = delete_template(str, /(#{float_r})\/(#{float_r})/, true)
@@ -371,7 +413,7 @@ INTERVAL = {
     end
 
     def link_by_image_title(node, title, path=true)
-      a_tag = node 
+      a_tag = node
         .search("img[title='#{title}']")
         .first
         .parent
@@ -381,14 +423,14 @@ INTERVAL = {
 end
 
 =begin
-  td#0: 
+  td#0:
     link#0: link to details (find by title of image ="Подробнее")
     link#1: link to map  (find by title of image ="Панорама")
-  td#1: 
+  td#1:
     Address
     link#0: address link
-  td#2 
-    details 
+  td#2
+    details
   td#3
     stage
   td#4
