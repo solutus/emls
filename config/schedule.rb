@@ -18,6 +18,6 @@
 # end
 
 # Learn more: http://github.com/javan/whenever
-every 1.day, :at => '23:06' do
+every "*/5 * * * *" do 
   rake "iterations:emls"
 end
