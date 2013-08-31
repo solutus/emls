@@ -6,8 +6,6 @@ set :port, 8222
 set :application, "realty"
 set :repository,  "ssh://git@inmyhouse.su:8222/~/projects/realty.git"
 set :scm, :git
-set :stage, "production"
-set :rack_env, "production"
 set :use_sudo,    false
 set :user, "deploy"
 set :deploy_to, "/home/deploy/#{application}"
@@ -42,12 +40,18 @@ require "whenever/capistrano"
 # end
 
 namespace :deploy do
-  task :start do 
+  task :start do
   end
 
-  task :stop do 
+  task :stop do
   end
 
-  task :restart do 
+  task :restart do
+  end
+
+  task :copy_config do
+    run "cp #{shared_path}/config/production.rb #{current_release}/config/production.rb"
   end
 end
+
+after "deploy:finalize_update", "deploy:copy_config"
