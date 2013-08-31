@@ -3,7 +3,7 @@ require "capistrano-rbenv"
 
 server "176.58.97.199", :app, :web, :db, :primary => true
 set :port, 8222
-set :application, "realty"
+set :application, "flats"
 set :repository,  "ssh://git@inmyhouse.su:8222/~/projects/realty.git"
 set :scm, :git
 set :use_sudo,    false

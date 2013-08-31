@@ -20,6 +20,6 @@
 # Learn more: http://github.com/javan/whenever
 set :environment_variable, "RACK_ENV"
 
-every "*/1 * * * *" do 
+every "30 4 * * *" do 
   rake "iterations:emls"
 end
