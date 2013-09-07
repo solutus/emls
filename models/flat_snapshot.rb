@@ -26,4 +26,21 @@ class FlatSnapshot < Sequel::Model
     columns.each{ |c| (res = 1; puts c) and break if self.send(c) != other.send(c) }
     res
   end
+
+# TODO rework me
+
+  SHORT_FORMAT_FIELDS = [:address, :description, :details,
+                           :price, :stage, :stage_amount]
+
+  def to_s(format = :short)
+    methods = self.class.columns - [:id]
+    if format == :short
+      methods = methods.select{|m| SHORT_FORMAT_FIELDS.include? m }
+    end
+    methods.inject([]) do |data, m|
+      data << "#{m}: #{send m}"
+      data
+    end.join("\n")
+  end
+
 end

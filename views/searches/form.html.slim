@@ -1,0 +1,32 @@
+h1 Создание нового поиска
+p
+  | Задайте поиск с запасом по ценам в 20% снизу и сверху на случай,
+  |  если цена квартиры изменится.
+== form(:search, :create) do |f|
+  table
+    tr
+      td== f.label :flat_types, "Тип квартиры"
+      td== f.select :flat_types, Emls::FLAT_TYPES.invert.to_a, multiple: true, required: true
+    tr
+      td== f.label :min_price, "Мин. цена, тыс. руб."
+      td== f.input :min_price, type: :number, required: true
+    tr
+      td== f.label :max_price, "Макс. цена, тыс. руб."
+      td== f.input :max_price, type: :number, required: true
+    tr
+      td== f.label :districts, "Районы"
+      td== f.select :districts, Emls::DISTRICTS.invert.to_a[1..-1], multiple: true, required: true
+    tr
+      td== f.label :metros, "Метро"
+      td== f.select :metros, Emls::METROS.invert.to_a[1..-1], multiple: true, required: true
+    tr
+      td== f.label :interval, "Период"
+      td== f.select :interval, Emls::INTERVALS.invert, required: true, value: Emls::INTERVALS["месяц"]
+    tr
+      td== f.label :min_square, "Мин. площадь"
+      td== f.input :min_square, type: :number, required: true
+    tr
+      td== f.label :max_square, "Макс. площадь"
+      td== f.input :max_square, type: :number, required: true
+
+  == submit "Сохранить"

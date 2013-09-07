@@ -4,6 +4,10 @@ ConfigData = {
     charset: "utf8"
   },
   tables: {
+    users: {
+      login: {type: :text},
+      password_hash: {type: :text}
+    },
     flats: {
       uid: {type: :text},
       blacklist: {type: :boolean, default: false}
@@ -37,6 +41,7 @@ ConfigData = {
       changed: {type: :boolean, default: false}
     },
     searches: {
+      user_id: {type: :integer},
       flat_types: {}, 
       min_price: {}, 
       max_price: {}, 

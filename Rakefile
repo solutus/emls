@@ -7,16 +7,18 @@ namespace :db do
   end
 
   desc "Create tables"
-  task :create_tables do 
-    ConfigData[:tables].each do |table_name, fields|
-      DB.create_table table_name do
-        primary_key :id
+  task :create_tables do
+    DB.transaction do
+      ConfigData[:tables].each do |table_name, fields|
+        DB.create_table table_name do
+          primary_key :id
 
-        fields.each do |name, params|
-          if params.empty? 
-            String(name) 
-          else
-            column(name, params[:type], default: params[:default])
+          fields.each do |name, params|
+            if params.empty?
+              String(name)
+            else
+              column(name, params[:type], default: params[:default])
+            end
           end
         end
       end
@@ -24,14 +26,16 @@ namespace :db do
   end
 
   desc "Drop tables"
-  task :drop_tables do 
-    ConfigData[:tables].keys.each{|name| DB.drop_table name }
+  task :drop_tables do
+    DB.transaction do
+      ConfigData[:tables].keys.each{|name| DB.drop_table name }
+    end
   end
 end
 
-namespace :iterations do 
+namespace :iterations do
   desc "Make emls iteration"
-  task :emls do 
+  task :emls do
     Emls.new.save
   end
 end

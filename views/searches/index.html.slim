@@ -1,0 +1,25 @@
+h1 Сохраненные поиски
+- @searches.each do |s|
+  = "ID: #{s.id}"
+  br
+  = "Типы квартир: #{s.flat_type_names}"
+  br
+  = "Мин. цена, т.р.: #{s.min_price}"
+  br
+  = "Макс. цена, т.р.: #{s.max_price}"
+  br
+  = "Районы: #{s.district_names}"
+  br
+  = "Метро: #{s.metro_names}"
+  br
+  = "Период: #{s.interval_name}"
+  br
+  = "Мин. площадь: #{s.min_square}"
+  br
+  = "Макс. площадь: #{s.max_square}"
+  br
+  a href = "/searches/#{s.id}/last_flat_snapshots" квартиры
+  br
+  == form "/search/#{s.id}", :delete, onsubmit: "return confirm('Are you sure?')" 
+  == submit "удалить" 
+  hr
