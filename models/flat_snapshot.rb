@@ -23,7 +23,7 @@ class FlatSnapshot < Sequel::Model
     return 1 if other.nil?
 
     res = 0
-    columns.each{ |c| (res = 1; puts c) and break if self.send(c) != other.send(c) }
+    columns.each{ |c| res = 1 and break if self.send(c) != other.send(c) }
     res
   end
 
