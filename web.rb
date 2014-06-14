@@ -6,13 +6,14 @@ require_relative "config"
 
 enable :sessions
 set :session_secret, 'f560ef7d5932d321525c7fe1203f34b98492896391660a4a407ff7125947791964661482efe8483a3b8b91f0dbad59fa40a4acfe2a93b800328ebc64233409d6'
+set :slim, :layout_engine => :slim, :layout => :"layout.html"
 
 before { request.path_info.sub! %r{/$}, '' }
-before do 
-  authorize!  
+before do
+  authorize!
 end
 
-get "/searches/new" do 
+get "/searches/new" do
   slim :"searches/form.html"
 end
 
@@ -23,32 +24,39 @@ post "/search" do
 end
 
 delete "/search/:id" do
-  Search[params[:id]].destroy
+  current_user.searches_dataset[params[:id]].destroy
   redirect "/searches", 302
 end
 
 get "/searches" do
-  @searches = Search.all
+  @searches = current_user.searches
   slim :"searches/index.html"
 end
 
 get "/search/:search_id/iterations" do
-  @iterations = Search[params[:search_id]]
+  @iterations = current_user.iterations(params[:search_id])
 end
 
 get "/iterations/:id" do
-  @iteration = Iteration[params[:id]]
+  @iteration = current_user.iteration(params[:id])
 end
 
 get "/iterations/:id/flat_snapshots" do
-  @iteration = Iteration[params[:id]]
-  @flat_snapshots = @iteration.flat_snapshots
+  @flat_snapshot = current_user.flat_snapshots(params[:id])
 end
 
 get "/searches/:search_id/last_flat_snapshots" do
-  @flat_snapshots = Search[params[:search_id]].last_flat_snapshots
-  @flat_snapshots.sort!{|x, y| x.price <=> y.price}
+  @flat_snapshots = current_user
+    .last_flat_snapshots(params[:search_id])
   slim :"flat_snapshots/index.html"
+end
+
+post "/black_lists/:flat_id/toggle" do
+  query = {user_id: current_user.id, flat_id: params[:flat_id]}
+
+  black_list = BlackList.where(query)
+  black_list.empty? ? BlackList.create(query) : black_list.destroy
+  head :ok
 end
 
 # Authentication
@@ -62,8 +70,8 @@ helpers do
   def authorized?
     auth ||=  Rack::Auth::Basic::Request.new(request.env)
     login, password = auth.provided? && auth.basic? && auth.credentials
-    self.current_user = User.all.find do |u| 
-      u.login == login && u.password == password 
+    self.current_user = User.all.find do |u|
+      u.login == login && u.password == password
     end
   end
 
@@ -76,6 +84,6 @@ helpers do
 
   def current_user
     user_id = session['user_id']
-    @current_user ||= User[user_id] if user_id 
+    @current_user ||= User[user_id] if user_id
   end
 end

@@ -1,8 +1,11 @@
 class FlatSnapshot < Sequel::Model
   include Comparable
+  extend Forwardable
   many_to_one :iteration
   many_to_one :flat
 
+  delegate :user => :iteration
+ 
   def before_create
     last = FlatSnapshot.last(flat_id: flat_id)
     if last.nil?
@@ -27,13 +30,17 @@ class FlatSnapshot < Sequel::Model
     res
   end
 
+  def black?
+    !BlackList.where(flat_id: flat_id, user_id: user.id).empty?
+  end
+
 # TODO rework me
 
-  SHORT_FORMAT_FIELDS = [:address, :description, :details,
+  SHORT_FORMAT_FIELDS = [:address, :description, :details, :id,
                            :price, :stage, :stage_amount]
 
   def to_s(format = :short)
-    methods = self.class.columns - [:id]
+    methods = self.class.columns
     if format == :short
       methods = methods.select{|m| SHORT_FORMAT_FIELDS.include? m }
     end
@@ -42,5 +49,4 @@ class FlatSnapshot < Sequel::Model
       data
     end.join("\n")
   end
-
 end

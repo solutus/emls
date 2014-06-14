@@ -175,7 +175,7 @@ class Emls
       min_square: 28,
       max_square: 33,
       districts: [4, 14],
-      metros: [37, 40],
+      metros: [20, 37, 40, 57],
       interval: 2 }.merge(opts)
   end
 
@@ -222,6 +222,7 @@ class Emls
     end
     true
   end
+
 
   class Parser
     def initialize(docs)
@@ -400,7 +401,8 @@ class Emls
         details["kitchen"]  = delete_template str, /кух\.\s+(#{float_r})/
         details["corridor"] = delete_template str, /кор\.\s+(#{float_r})/
         s, ls               = delete_template(str, /(#{float_r})\/(#{float_r})/, true)
-        details["square"], details["live_square"] = s, ls
+        details["square"] = s || delete_template(str, /(#{float_r})/)
+        details["live_square"] = ls
         details
        end.call
     end

@@ -36,6 +36,6 @@ end
 namespace :iterations do
   desc "Make emls iteration"
   task :emls do
-    Emls.new.save
+    Emls.new(max_price: 3500, max_square: 35, metros: []).save
   end
 end

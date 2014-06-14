@@ -1,19 +1,26 @@
-require_relative "../emls.rb"
+require_relative "helper.rb"
+require "minitest"
 require "minitest/autorun"
+require "simple_mock"
 
 describe Emls do
   before do
-    @emls = Emls.new({})
-    def @emls.open_url(any)
-      HTML
-    end
-    @emls_class = class << @emls; self; end
+    puts "a"
+    @emls = SimpleMock.new Emls.new({})
+    @emls.expect :open_url, HTML, [String]
+#    def @emls.open_url(any)
+#      HTML
+#    end
   end
 
   describe ".flats" do
     it "returns array" do
       @emls.flats.must_be_instance_of Array
     end
+  end
+
+  describe ".save" do 
+
   end
 
   describe ".pages_urls" do
@@ -41,7 +48,7 @@ describe Emls do
                     Emls::DISTRICTS["Выборгский"]]
       metros     = [Emls::METROS["Просвещения пр."],
                     Emls::METROS["Пионерская"]]
-      interval   = Emls::INTERVAL["месяц"]
+      interval   = Emls::INTERVALS["месяц"]
 
       url = @emls.compose_url(flat_types: flat_types,
                               min_price: min_price,
@@ -62,7 +69,7 @@ describe Emls do
       max_square = 33
       districts  = [Emls::DISTRICTS["Выборгский"]]
       metros     = [Emls::METROS["Просвещения пр."]]
-      interval   = Emls::INTERVAL["месяц"]
+      interval   = Emls::INTERVALS["месяц"]
       url = @emls.compose_url(flat_types: flat_types,
                               min_price: min_price,
                               max_price: max_price,
@@ -82,7 +89,7 @@ describe Emls do
       max_square = 33
       districts  = [Emls::DISTRICTS["Выборгский"]]
       metros     = [Emls::METROS["Просвещения пр."]]
-      interval   = Emls::INTERVAL["месяц"]
+      interval   = Emls::INTERVALS["месяц"]
 
       url = @emls.compose_url(flat_types: flat_types,
                               min_price: min_price,
@@ -120,7 +127,7 @@ describe Emls do
     }
 
     before do
-      @item = @emls.parse[0]
+      @item = @emls.flats[0]
     end
 
     MAP.each do |meth, result|
@@ -132,9 +139,6 @@ describe Emls do
     it "has created at" do
       ((Time.now - @item.created_at) < 1).must_equal true
     end
-
-
-
   end
 
   HTML = %q{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -1,5 +1,6 @@
 require "sequel"
 require "logger"
+require "forwardable"
 environment = ENV["RACK_ENV"] || "development"
 require_relative "./config/#{environment}"
 require_relative "emls"

@@ -10,7 +10,6 @@ ConfigData = {
     },
     flats: {
       uid: {type: :text},
-      blacklist: {type: :boolean, default: false}
     },
     flat_snapshots: {
       flat_id: {type: :integer},
@@ -34,7 +33,7 @@ ConfigData = {
       link_to_map: {type: :text},
       contact_link: {type: :text},
       link_to_details: {type: :text},
-      placed_at: {}, 
+      placed_at: {},
       created_at: {type: :datetime},
       iteration_id: {type: :integer},
       unread: {type: :boolean, default: false},
@@ -42,9 +41,9 @@ ConfigData = {
     },
     searches: {
       user_id: {type: :integer},
-      flat_types: {}, 
-      min_price: {}, 
-      max_price: {}, 
+      flat_types: {},
+      min_price: {},
+      max_price: {},
       min_square: {},
       max_square: {},
       districts: {},
@@ -54,6 +53,10 @@ ConfigData = {
     iterations: {
       search_id: {type: :integer},
       created_at: {type: :datetime}
+    },
+    black_lists: {
+      user_id: {type: :integer},
+      flat_id: {type: :integer}
     }
   }
 }
